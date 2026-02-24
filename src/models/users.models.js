@@ -103,6 +103,8 @@ userSchema.methods.generateTemporaryTokens = function () {
     .digest("hex");
 
   const tokenExpiry = Date.now() + 20 * 60 * 1000; // 20 minutes
+
+  return { unhashedTokens, hashedTokens, tokenExpiry };
 };
 
 export const User = mongoose.model("User", userSchema);
