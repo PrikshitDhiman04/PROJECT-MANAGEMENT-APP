@@ -94,7 +94,31 @@ const login = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Inavlid Credentials");
   }
 
-  
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id,
+  );
+
+  const loggedInUser = await User.findById(user._id).select(
+    "-password, -refreshToken -emailVerificationToken -emailVerificationExpiry",
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(new ApiRespose(200,
+      {
+        user: loggedInUser,
+        accessToken,
+        refreshToken
+      },
+      "User logged successfully"
+    ));
 });
 
 export { registerUser, login };
