@@ -75,4 +75,26 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser };
+const login = asyncHandler(async (req, res) => {
+  const { email, password, username } = req.body;
+
+  if (!email) {
+    throw new ApiError(400, "Username or email is required");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(400, "User does not exist");
+  }
+
+  const isPasswordValid = await user.isPasswordCorrect(password);
+
+  if (!isPasswordValid) {
+    throw new ApiError(400, "Inavlid Credentials");
+  }
+
+  
+});
+
+export { registerUser, login };
