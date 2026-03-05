@@ -3,6 +3,7 @@ import { ApiRespose } from "../utils/api_response.js";
 import { ApiError } from "../utils/api_errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -111,14 +112,40 @@ const login = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .json(new ApiRespose(200,
-      {
-        user: loggedInUser,
-        accessToken,
-        refreshToken
-      },
-      "User logged successfully"
-    ));
+    .json(
+      new ApiRespose(
+        200,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken,
+        },
+        "User logged successfully",
+      ),
+    );
 });
 
-export { registerUser, login };
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        refreshToken: "",
+      },
+    },
+    {
+      new: true,
+    },
+  );
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiRespose(200, "UserLoggedOut"));
+});
+
+export { registerUser, login, logoutUser };
