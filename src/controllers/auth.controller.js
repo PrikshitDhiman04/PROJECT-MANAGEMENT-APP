@@ -148,4 +148,51 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiRespose(200, "UserLoggedOut"));
 });
 
-export { registerUser, login, logoutUser };
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiRespose(200, req.user, "Current User Fetched Successfully"));
+});
+
+// const getCurrentUser = asyncHandler(async (req, res) => { })
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { verificationToken } = req.params;
+
+  if (!verificationToken) {
+    throw new ApiError(400, "Api Error is Missing");
+  }
+
+  let hashedTokens = crypto
+    .createHash("sha256")
+    .update(verificationToken)
+    .digest("hex");
+
+  const user = await User.findOne({
+    emailVerificationToken: hashedTokens,
+    emailVerificationExpiry: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new ApiError(400, "Token is invaild or Expired");
+  }
+
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpiry = undefined;
+
+  user.isEmailVerified = true;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(
+      new ApiRespose(
+        200,
+        {
+          isEmailVerified: true
+        },
+        "Email is Verified",
+      )
+    )
+});
+
+export { registerUser, login, logoutUser, getCurrentUser, verifyEmail };
