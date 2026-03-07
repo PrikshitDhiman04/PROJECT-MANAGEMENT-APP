@@ -373,5 +373,6 @@ export {
   resendEmailVerification,
   refreshAccessToken,
   forgotPasswordReq,
-  changeCurrentPassword
+  changeCurrentPassword,
+  resetForgotpassword,
 };
