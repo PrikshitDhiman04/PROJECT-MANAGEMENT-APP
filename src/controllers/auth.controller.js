@@ -337,21 +337,30 @@ const resetForgotpassword = asyncHandler(async (req, res) => {
   user.forgotPasswordExpiry = undefined;
   user.forgotPasswordToken = undefined;
 
-  user.password = newPassword
-  await user.save({validateBeforeSave: false})
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
 
-  return res  
+  return res
     .status(200)
-    .json(
-      new ApiRespose(
-        200,
-        {},
-        "Password reset successfully"
-      )
-    )
+    .json(new ApiRespose(200, {}, "Password reset successfully"));
+});
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
 
+  const user = await User.findById(req.user?._id);
 
+  await user.isPasswordCorrect(oldPassword);
 
+  if (!isPasswordValid) {
+    throw new ApiError(400, "Invalid Old Password");
+  }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiRespose(200, {}, "Password changed successfully"));
 });
 // const getCurrentUser = asyncHandler(async (req, res) => { })
 
@@ -364,4 +373,5 @@ export {
   resendEmailVerification,
   refreshAccessToken,
   forgotPasswordReq,
+  changeCurrentPassword
 };
