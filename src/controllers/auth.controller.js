@@ -2,7 +2,11 @@ import { User } from "../models/users.models.js";
 import { ApiRespose } from "../utils/api_response.js";
 import { ApiError } from "../utils/api_errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
-import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js";
+import {
+  emailVerificationMailgenContent,
+  forgotPasswordVerificationMailgenContent,
+  sendEmail,
+} from "../utils/mail.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import jwt from "jsonwebtoken";
 
@@ -101,7 +105,7 @@ const login = asyncHandler(async (req, res) => {
   );
 
   const loggedInUser = await User.findById(user._id).select(
-    "-password, -refreshToken -emailVerificationToken -emailVerificationExpiry",
+    "-password -refreshToken -emailVerificationToken -emailVerificationExpiry",
   );
 
   const options = {
@@ -276,6 +280,42 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
+const forgotPasswordReq = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(404, "User Do not exist", []);
+  }
+
+  const { unhashedTokens, hashedTokens, tokenExpiry } =
+    user.generateTemporaryTokens();
+
+  user.forgotPasswordToken = hashedTokens;
+  user.forgotPasswordExpiry = tokenExpiry;
+
+  await user.save({ validateBeforeSave: false });
+
+  await sendEmail({
+    email: user?.email,
+    subject: "Password Reset Request",
+    mailgenContent: forgotPasswordVerificationMailgenContent(
+      user.username,
+      `${process.env.FORGOT_PASSWORD_REQUEST_URL}/${unhashedTokens}`,
+    ),
+  });
+
+  return res
+    .status(200)
+    .json(
+      new ApiRespose(
+        200,
+        {},
+        "Password reset mail has been sent on your Email"
+      )
+    )
+});
 // const getCurrentUser = asyncHandler(async (req, res) => { })
 
 export {
@@ -286,4 +326,5 @@ export {
   verifyEmail,
   resendEmailVerification,
   refreshAccessToken,
+  forgotPasswordReq,
 };
