@@ -11,10 +11,13 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
+// unsecured routes
 router.route("/register").post(userRegisterValidator(), validate, registerUser);
 router.route("/login").post(userLoginValidator(), validate, login);
+router.route("/verify-email/:verificationToken").post(userLoginValidator(), validate, login);
 
 // secured Routes
 router.route("/logout").post(verifyJWT, logoutUser);
+
 
 export default router;
