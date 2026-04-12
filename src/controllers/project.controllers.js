@@ -7,7 +7,9 @@ import { asyncHandler } from "../utils/async-handler.js";
 import mongoose from "mongoose";
 import { UserRoleEnum } from "../utils/constants.js";
 
-const getProjects = asyncHandler(async (req, res) => {
+const getProjects = asyncHandler(async (req, res) => {});
+const getProjectById = asyncHandler(async (req, res) => {});
+const createProject = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
 
   const project = await Project.create({
@@ -26,9 +28,9 @@ const getProjects = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(201, project, "Project created Successfully"));
 });
-const getProjectById = asyncHandler(async (req, res) => {});
-const createProject = asyncHandler(async (req, res) => {});
-const updateProject = asyncHandler(async (req, res) => {});
+const updateProject = asyncHandler(async (req, res) => {
+    
+});
 const deleteProject = asyncHandler(async (req, res) => {});
 const addMemebersToProject = asyncHandler(async (req, res) => {});
 const getProjectMembers = asyncHandler(async (req, res) => {});
