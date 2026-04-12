@@ -1,5 +1,5 @@
 import { User } from "../models/users.models.js";
-import { ApiRespose } from "../utils/api_response.js";
+import { ApiResponse } from "../utils/api_response.js";
 import { ApiError } from "../utils/api_errors.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
@@ -73,7 +73,7 @@ const registerUser = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(
-      new ApiRespose(
+      new ApiResponse(
         200,
         { user: createdUser },
         "User registered successfully and verification email has been sent on your email",
@@ -118,7 +118,7 @@ const login = asyncHandler(async (req, res) => {
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json(
-      new ApiRespose(
+      new ApiResponse(
         200,
         {
           user: loggedInUser,
@@ -150,13 +150,13 @@ const logoutUser = asyncHandler(async (req, res) => {
     .status(200)
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json(new ApiRespose(200, "UserLoggedOut"));
+    .json(new ApiResponse(200, "UserLoggedOut"));
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
-    .json(new ApiRespose(200, req.user, "Current User Fetched Successfully"));
+    .json(new ApiResponse(200, req.user, "Current User Fetched Successfully"));
 });
 
 const resendEmailVerification = asyncHandler(async (req, res) => {
@@ -188,7 +188,7 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiRespose(200, {}, "Mail has been send to your email id"));
+    .json(new ApiResponse(200, {}, "Mail has been send to your email id"));
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
@@ -219,7 +219,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
   await user.save({ validateBeforeSave: false });
 
   return res.status(200).json(
-    new ApiRespose(
+    new ApiResponse(
       200,
       {
         isEmailVerified: true,
@@ -269,7 +269,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", newRefreshToken, options)
       .json(
-        new ApiRespose(
+        new ApiResponse(
           200,
           { accessToken, refreshToken: newRefreshToken },
           "Access token refreshed",
@@ -309,7 +309,7 @@ const forgotPasswordReq = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiRespose(
+      new ApiResponse(
         200,
         {},
         "Password reset mail has been sent on your Email",
@@ -342,7 +342,7 @@ const resetForgotpassword = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiRespose(200, {}, "Password reset successfully"));
+    .json(new ApiResponse(200, {}, "Password reset successfully"));
 });
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
@@ -360,7 +360,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiRespose(200, {}, "Password changed successfully"));
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
 });
 // const getCurrentUser = asyncHandler(async (req, res) => { })
 
