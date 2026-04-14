@@ -58,17 +58,21 @@ const getProjects = asyncHandler(async (req, res) => {
     },
   ]);
 
-  return res.status(200).json(new ApiResponse(200, projects, "Projects Fetched Successfully"))
+  return res
+    .status(200)
+    .json(new ApiResponse(200, projects, "Projects Fetched Successfully"));
 });
 const getProjectById = asyncHandler(async (req, res) => {
-  const {projectId} = req.params
-  const project = await Project.findById(projectId)
+  const { projectId } = req.params;
+  const project = await Project.findById(projectId);
 
-  if(!project){
-    throw new ApiError(404, "Project not found")
+  if (!project) {
+    throw new ApiError(404, "Project not found");
   }
 
-  return req.status(200).json(new ApiResponse(200, "project fetched Successfully"))
+  return req
+    .status(200)
+    .json(new ApiResponse(200, "project fetched Successfully"));
 });
 const createProject = asyncHandler(async (req, res) => {
   const { name, description } = req.body;
@@ -121,7 +125,35 @@ const deleteProject = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, project, "Project Deleted Successfully"));
 });
-const addMemebersToProject = asyncHandler(async (req, res) => {});
+const addMemebersToProject = asyncHandler(async (req, res) => {
+  const { email, role } = req.body;
+  const { projectId } = req.params;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  await ProjectMember.findByIdAndUpdate(
+    {
+      user: new mongoose.Types.ObjectId(user._id),
+      project: new mongoose.Types.ObjectId(projectId),
+    },
+    {
+      user: new mongoose.Types.ObjectId(user._id),
+      project: new mongoose.Types.ObjectId(projectId),
+      role: role,
+    },
+    {
+      new: true,
+      upsert: true,
+    },
+  );
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, {}, "project member added successfully"));
+});
 const getProjectMembers = asyncHandler(async (req, res) => {});
 const updateMembersRole = asyncHandler(async (req, res) => {});
 const deleteMembers = asyncHandler(async (req, res) => {});
