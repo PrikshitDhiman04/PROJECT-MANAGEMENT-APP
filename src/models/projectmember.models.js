@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { AvailableUserRole, UserRoleEnum } from "../utils/constants";
+import { AvailableUserRole, UserRoleEnum } from "../utils/constants.js";
 
 const projectMemberSchema = new Schema(
   {
@@ -23,4 +23,7 @@ const projectMemberSchema = new Schema(
   { timestamps: true },
 );
 
-export const ProjectMember = mongoose.model("ProjectMember", projectMemberSchema);
+export const ProjectMember = mongoose.model(
+  "ProjectMember",
+  projectMemberSchema,
+);

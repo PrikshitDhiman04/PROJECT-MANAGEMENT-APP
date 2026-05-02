@@ -31,7 +31,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 });
 
 export const validateProjectPermission = (roles = []) => {
-  asyncHandler(async (req, res, next) => {
+  return asyncHandler(async (req, res, next) => {
     const { projectId } = req.params;
 
     if (!projectId) {
@@ -40,7 +40,7 @@ export const validateProjectPermission = (roles = []) => {
 
     const project = await ProjectMember.findOne({
       project: new mongoose.Types.ObjectId(projectId),
-      user: new mongoose.Types.ObjectId(req.user_id),
+      user: new mongoose.Types.ObjectId(req.user._id),
     });
 
     if (!project) {
@@ -57,5 +57,6 @@ export const validateProjectPermission = (roles = []) => {
         "You do not have permission to perform this action",
       );
     }
+    next();
   });
 };
