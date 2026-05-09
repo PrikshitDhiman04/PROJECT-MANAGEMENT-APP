@@ -12,19 +12,16 @@ const getTasks = asyncHandler(async (req, res) => {
   const { projectId } = req.params;
   const project = await Project.findById(projectId);
 
-
   if (!project) {
     throw new ApiError(404, "Project Not Found");
   }
- const tasks = await Task.find({
+  const tasks = await Task.find({
     project: new mongoose.Types.ObjectId(projectId),
   }).populate("assignedTo", "avatar username fullname");
 
   return res
     .status(201)
     .json(new ApiResponse(201, tasks, "Task Fetched Succesfully"));
-
-
 });
 const createTask = asyncHandler(async (req, res) => {
   const { title, description, assignedTo, status } = req.body;
@@ -57,15 +54,84 @@ const createTask = asyncHandler(async (req, res) => {
     attachments,
   });
 
-  return res   
-    .status(201) 
-    .json(
-        new ApiResponse(201, task, "Task Created Succesfully")
-    )
-
+  return res
+    .status(201)
+    .json(new ApiResponse(201, task, "Task Created Succesfully"));
 });
 const getTaskByTd = asyncHandler(async (req, res) => {
-  //test
+  const { taskId } = req.params;
+  const task = await Task.aggregate([
+    {
+      $match: {
+        _id: mongoose.Types.ObjectId(taskId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "assignedTo",
+        foreignField: "_id",
+        as: "assignedTo",
+        pipeline: [
+          {
+            _id: 1,
+            username: 1,
+            fullname: 1,
+            avatar: 1,
+          },
+          {
+            $lookup: {
+              from: "subtask",
+              localField: "_id",
+              foreignField: "tasks",
+              as: "subtask",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "users",
+                    localField: "createdBy",
+                    foreignField: "_id",
+                    as: "createdBy",
+                    pipeline: [
+                      {
+                        $project: {
+                          id: 1,
+                          username: 1,
+                          fullname: 1,
+                          avatar: 1,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              createdBy: {
+                $arrayElemAt: ["createdBy", 0],
+              },
+            },
+          },
+          {
+            $addFields: {
+              assignedTo: {
+                $arrayElemAt: ["assignedTo", 0],
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  if (!task || task.length === 0) {
+    throw new ApiError(404, "Task not Found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, task[0], "Task Fetched Successfully"));
 });
 const updateTask = asyncHandler(async (req, res) => {
   //test
